@@ -1,0 +1,51 @@
+name: Reusable CI
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        type: string
+      description:
+        type: string
+
+concurrency:
+  group: alain
+  cancel-in-progress: false
+  
+jobs:
+  toto:
+    if: inputs.name == 'alain' && inputs.description == 'pellegrino'
+    runs-on: ubuntu-latest
+    environment: prd
+
+    steps:
+
+      - name: Run a one-line script
+        run: echo "name = ${{ inputs.name }}"
+
+  tutu:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Run a one-line script
+        run: echo "description = ${{ inputs.description }}"
+        
+
+  tata:
+    needs: [toto,tutu]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: apellegr06/reusable-ci-example
+
+      - name: sleep
+        run: sleep 120
+        
+      - name: Run a one-line script
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -Poy "${GITHUB_WORKSPACE}/sample.yml"
